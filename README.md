@@ -55,7 +55,17 @@ hg.clone("http://bitbucket.org/jgable/node-hg", destPath, function(err, output) 
 });
 ```
 
+### Exposed Base Classes
+
+#### HGRepo
+
+The base class for Mercurial Repo interaction.  The exposed API is just wrappers around the functions available in `HGRepo`.
+
+#### HGCommandServer
+
+The base class responsible for instantiating and communicating with a Mercurial command server.  Must be instantiated in an existing Mercurial repository (check out `HGRepo.MakeTempRepo` to quickly get a temporary repo up)
+
 LICENSE
 =======
 
-MIT, Copyright 2013 Jacob Gable
+[MIT](http://opensource.org/licenses/MIT), Copyright 2013 [Jacob Gable](http://jacobgable.com)
