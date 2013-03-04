@@ -1,4 +1,6 @@
-
+###
+The roadmap for the project.  This is where new features are tracked during development.
+###
 
 describe "node-hg", ->
 
@@ -20,4 +22,4 @@ describe "node-hg", ->
 
 	it "can push changes", -> true
 
-	it "can merge repos"
+	it "can merge repos", -> true
