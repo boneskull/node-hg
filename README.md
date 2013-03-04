@@ -68,4 +68,4 @@ The base class responsible for instantiating and communicating with a Mercurial 
 LICENSE
 =======
 
-[MIT](http://opensource.org/licenses/MIT), Copyright 2013 [Jacob Gable](http://jacobgable.com)
+[MIT](http://opensource.org/licenses/MIT), No Attribution Required, Copyright 2013 [Jacob Gable](http://jacobgable.com)
