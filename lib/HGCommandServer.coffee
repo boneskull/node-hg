@@ -113,6 +113,15 @@ class HGCommandServer extends EventEmitter
 	_handleServerData: (data) ->
 		lines = []
 		body = ""
+		getChanName = (chan) ->
+			chanName = switch chan
+				when "o" then "output"
+				when "r" then "result"
+				when "e" then "error"
+				when "d" then "debug"
+
+			chanName
+
 		chan = String.fromCharCode data.readUInt8(0)
 
 		currBuffPos = 0
@@ -125,16 +134,32 @@ class HGCommandServer extends EventEmitter
 			# Increment the buffer position the length of the line + 5 for the channel and bodyLength
 			currBuffPos += line.length + 5
 
-		chanName = switch chan
-			when "o" then "output"
-			when "r" then "result"
-			when "e" then "error"
-			when "d" then "debug"
+		# Aggregate the channel lines so we can emit the right events per line
+		chanGroups = []
+		currChan = lines[0].channel
+		currGroup = []
+		for line in lines
+			if line.channel == currChan
+				currGroup.push line
+				continue
 
-		if chanName == "error"
-			@emit chanName, new Error(body)
-		else
-			@emit chanName, body, lines
+			chanGroups.push currGroup
+
+			currGroup = [line]
+			currChan = line.channel
+
+		if currGroup.length > 0
+			chanGroups.push currGroup
+		
+		for group in chanGroups
+			chanName = getChanName group[0].channel
+
+			body = (line.body for line in group).join "\n"
+
+			if chanName == "error"
+				return @emit chanName, new Error(body), group[0], group
+
+			@emit chanName, body, group
 
 	_handleServerError: (data) ->
 		# Emit an error event with the data.

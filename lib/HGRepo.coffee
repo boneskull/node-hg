@@ -29,6 +29,9 @@ class HGRepo
 
 				done null, new HGRepo(tmpDir)
 
+	###
+	Create a new HGRepo with a rootpath defined by the passed in `@path` (defaults to `process.cwd()`)
+	###
 	constructor: (@path = process.cwd()) ->
 
 	###
@@ -104,29 +107,79 @@ class HGRepo
 
 		@_runCommandGetOutput @path, serverCmd, done
 
+	###
+	Pull changes from another repository.
+	###
+	pull: (from, opts, done) ->
+		if _.isFunction opts
+			done = opts
+			opts = []
+
+		opts = @_parseOptions opts
+
+		serverCmd = (server) ->
+			server.runcommand.apply server, ["pull", from].concat(opts)
+
+		@_runCommandGetOutput @path, serverCmd, done
+
+	###
+	Update to the latest changes in a repository.
+	###
+	update: (opts, done) ->
+		if _.isFunction opts
+			done = opts
+			opts = []
+
+		opts = @_parseOptions opts
+
+		serverCmd = (server) ->
+			server.runcommand.apply server, ["update"].concat(opts)
+
+		@_runCommandGetOutput @path, serverCmd, done
+
+	###
+	Push changes to another repository
+	###
+	push: (to, opts, done) ->
+		if _.isFunction opts
+			done = opts
+			opts = []
+
+		opts = @_parseOptions opts
+
+		serverCmd = (server) ->
+			server.runcommand.apply server, ["push", to].concat(opts)
+
+		@_runCommandGetOutput @path, serverCmd, done
+
+	###
+	Parse an object into an array of command line arguments
+	###
 	_parseOptions: (opts) ->
 		# Convert an object to an array of opts
 		if _.isObject opts
 			newOpts = []
+			currKey = ""
+			pushVal = (v) ->
+				newOpts.push currKey
+				newOpts.push v
+
 			for own key, val of opts
-				newOpts.push key
+				currKey = key
 				if _.isArray val
 					# Push an array of values
-					_.each val, (v) -> 
-						newOpts.push key
-						newOpts.push val
+					_.each val, pushVal
 				else
 					# Push a single value
-					newOpts.push val
+					pushVal val
 
 			opts = newOpts
 
 		opts
 
 	###
-	Helper methods for running commands
+	Start a command server and return it for use
 	###
-
 	_startServer: (path, done) ->
 		server = new HGCommandServer()
 		server.start path, (err) ->
@@ -134,6 +187,9 @@ class HGRepo
 
 			done null, server
 
+	###
+	Convenience wrapper for starting a command server and executing a command
+	###
 	_runCommandGetOutput: (path, serverAction, done) ->
 		@_startServer path, (err, server) ->
 			return done err if err
@@ -147,7 +203,12 @@ class HGRepo
 			server.on "output", (body, lines) ->
 				allOutput = allOutput.concat lines
 
-			server.on "error", (err) ->
+			server.on "error", (err, line) ->
+				# Skip warnings, store as output
+				# TODO: Allow this to be configured
+				if line?.body?.slice(0, 7) == "warning"
+					return allOutput.push line
+
 				cleanUp()
 				done err
 

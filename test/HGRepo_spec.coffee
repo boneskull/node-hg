@@ -104,3 +104,117 @@ describe "HGRepo", ->
 									should.exist output
 
 									done()
+
+	it "can clone a repo from a remote path", (done) ->
+		# Set a 5 second timeout for this test (relies on bitbucket connection)
+		@timeout 5000
+
+		HGRepo.MakeTempRepo (err, repo) ->
+
+			otherPath = path.resolve(path.join(repo.path, "..", uuid.v1()))
+			
+			repo.clone "https://bitbucket.org/jacob4u2/node-hg", otherPath, (err, output) ->
+				throw err if err
+
+				should.exist output
+
+				otherRepo = new HGRepo(otherPath)
+
+				otherRepo.summary (err, output) ->
+					throw err if err
+
+					should.exist output
+
+					done()
+
+	it "can pull changes from another repo", (done) ->
+		HGRepo.MakeTempRepo (err, repo) ->
+
+			otherPath = path.resolve(path.join(repo.path, "..", uuid.v1()))
+
+			repo.clone repo.path, otherPath, (err, output) ->
+				throw err if err
+
+				should.exist output
+
+				otherRepo = new HGRepo(otherPath)
+
+				fs.writeFile path.join(repo.path, "one.txt"), "Text Content 1", (err) ->
+					throw err if err
+
+					fs.writeFile path.join(repo.path, "two.txt"), "Text Content 2", (err) ->
+						throw err if err
+
+						repo.add ['.'], (err, output) ->
+							throw err if err
+
+							output.length.should.equal 3
+
+							commitOpts = 
+								"-m": "A Test Commit"
+
+							repo.commit commitOpts, (err, output) ->
+								throw err if err
+
+								should.exist output
+
+								otherRepo.pull repo.path, (err, output) ->
+									throw err if err
+
+									should.exist output
+
+									otherRepo.update (err, output) ->
+										throw err if err
+
+										should.exist output
+
+										done()
+
+	it "can push changes to another repo", (done) ->
+		HGRepo.MakeTempRepo (err, repo) ->
+
+			otherPath = path.resolve(path.join(repo.path, "..", uuid.v1()))
+
+			repo.clone repo.path, otherPath, (err, output) ->
+				throw err if err
+
+				should.exist output
+
+				otherRepo = new HGRepo(otherPath)
+
+				fs.writeFile path.join(repo.path, "one.txt"), "Text Content 1", (err) ->
+					throw err if err
+
+					fs.writeFile path.join(repo.path, "two.txt"), "Text Content 2", (err) ->
+						throw err if err
+
+						repo.add ['.'], (err, output) ->
+							throw err if err
+
+							output.length.should.equal 3
+
+							commitOpts = 
+								"-m": "A Test Commit"
+
+							repo.commit commitOpts, (err, output) ->
+								throw err if err
+
+								should.exist output
+
+								repo.push otherRepo.path, (err, output) ->
+									throw err if err
+
+									should.exist output
+
+									otherRepo.update (err, output) ->
+										throw err if err
+
+										should.exist output
+
+										otherRepo.summary (err, output) ->
+											throw err if err
+
+											should.exist output
+
+											done()
+

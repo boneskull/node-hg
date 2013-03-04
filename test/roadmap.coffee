@@ -8,12 +8,14 @@ describe "node-hg", ->
 
 	it "can add files to a repo", -> true
 
-	it "can commit changes to a repo"
+	it "can commit changes to a repo", -> true
 
-	it "can clone a repo from a local path"
+	it "can clone a repo from a local path", -> true
 
-	it "can clone a repo from a remote server"
+	it "can clone a repo from a remote server", -> true
 
-	it "can pull changes into a repo"
+	it "can pull changes into a repo", -> true
 
-	it "can push changes"
+	it "can update a repo to latest", -> true
+
+	it "can push changes", -> true
