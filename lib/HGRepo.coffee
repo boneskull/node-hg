@@ -153,6 +153,36 @@ class HGRepo
 		@_runCommandGetOutput @path, serverCmd, done
 
 	###
+	Merge changes from another repository
+	###
+	merge: (opts, done) ->
+		if _.isFunction opts
+			done = opts
+			opts = []
+
+		opts = @_parseOptions opts
+
+		serverCmd = (server) ->
+			server.runcommand.apply server, ["merge"].concat(opts)
+
+		@_runCommandGetOutput @path, serverCmd, done
+
+	###
+	Resolve conflicts in a repository.
+	###	
+	resolve: (opts, done) ->
+		if _.isFunction opts
+			done = opts
+			opts = []
+
+		opts = @_parseOptions opts
+
+		serverCmd = (server) ->
+			server.runcommand.apply server, ["resolve"].concat(opts)
+
+		@_runCommandGetOutput @path, serverCmd, done
+
+	###
 	Parse an object into an array of command line arguments
 	###
 	_parseOptions: (opts) ->
@@ -162,7 +192,7 @@ class HGRepo
 			currKey = ""
 			pushVal = (v) ->
 				newOpts.push currKey
-				newOpts.push v
+				newOpts.push v if v
 
 			for own key, val of opts
 				currKey = key

@@ -19,6 +19,26 @@ describe "HGRepo", ->
 
 				done()
 
+	it "can init a new repo", (done) ->
+		HGRepo.MakeTempRepo (err, repo) ->
+			throw err if err
+
+			newRepoPath = path.resolve path.join(repo.path, "..", uuid.v1())
+
+			repo.init newRepoPath, (err, output) ->
+				throw err if err
+
+				should.exist output
+
+				otherRepo = new HGRepo(newRepoPath)
+
+				otherRepo.summary (err, output) ->
+					throw err if err
+
+					should.exist output
+
+					done()
+
 	it "can add files to a repo", (done) ->
 		HGRepo.MakeTempRepo (err, repo) ->
 
@@ -218,3 +238,100 @@ describe "HGRepo", ->
 
 											done()
 
+	it "can merge changes between two repos", (done) ->
+		HGRepo.MakeTempRepo (err, repo) ->
+
+			otherPath = path.resolve(path.join(repo.path, "..", uuid.v1()))
+
+			repo.clone repo.path, otherPath, (err, output) ->
+				throw err if err
+
+				should.exist output
+
+				otherRepo = new HGRepo(otherPath)
+				fileOne = path.join(repo.path, "one.txt")
+
+				fs.writeFile fileOne, "Text Content 1", (err) ->
+					throw err if err
+
+					fs.writeFile path.join(repo.path, "two.txt"), "Text Content 2", (err) ->
+						throw err if err
+
+						repo.add ['.'], (err, output) ->
+							throw err if err
+
+							output.length.should.equal 3
+
+							commitOpts = 
+								"-m": "A Test Commit"
+
+							repo.commit commitOpts, (err, output) ->
+								throw err if err
+
+								should.exist output
+
+								otherRepo.pull repo.path, (err, output) ->
+									throw err if err
+
+									should.exist output
+
+									otherRepo.update (err, output) ->
+										throw err if err
+
+										should.exist output
+
+										otherFileOne = path.join(otherRepo.path, "one.txt")
+
+										fs.appendFileSync otherFileOne, "\nSome More Text on Line 2"
+										fs.writeFileSync fileOne, "Some Changes on Line 1\n"
+
+										commitOpts = 
+											"-m": "Repo One Update"
+
+										repo.commit commitOpts, (err, output) ->
+											throw err if err
+
+											should.exist output
+
+											commitOpts = 
+												"-m": "Repo Two Update"
+
+											otherRepo.commit commitOpts, (err, output) ->
+												throw err if err
+
+												should.exist output
+
+												otherRepo.pull repo.path, (err, output) ->
+													throw err if err
+
+													should.exist output
+
+													otherRepo.merge (err, output) ->
+														throw err if err
+
+														should.exist output
+
+														resolveOpts = 
+															"--list": ""
+
+														otherRepo.resolve resolveOpts, (err, output) ->
+															throw err if err
+
+															should.exist output
+															output.length.should.equal 2
+
+															resolveOpts = 
+																"-m": "one.txt"
+
+															otherRepo.resolve resolveOpts, (err, output) ->
+																throw err if err
+
+																should.exist output
+
+																otherRepo.commit {"-m": "Merging from one"}, (err, output) ->
+																	throw err if err
+
+																	should.exist output
+
+																	# To get to the house that jack built....
+																	done()

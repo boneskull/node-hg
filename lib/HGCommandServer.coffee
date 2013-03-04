@@ -8,7 +8,7 @@ Logger = require "./common/logger"
 OutputLine = require "./common/OutputLine"
 
 defaults = 
-	hgOpts: ['--config', 'ui.interactive=True', 'serve', '--cmdserver', 'pipe']
+	hgOpts: ['--config', 'ui.interactive=True', '--config', 'ui.merge=internal:fail', 'serve', '--cmdserver', 'pipe']
 
 ###
 An HGCommandServer spawns the hg command server and handles communication between it and node.

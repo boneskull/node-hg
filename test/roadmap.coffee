@@ -19,3 +19,5 @@ describe "node-hg", ->
 	it "can update a repo to latest", -> true
 
 	it "can push changes", -> true
+
+	it "can merge repos"
