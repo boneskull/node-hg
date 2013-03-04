@@ -61,9 +61,62 @@ hg.clone("http://bitbucket.org/jgable/node-hg", destPath, function(err, output) 
 
 The base class for Mercurial Repo interaction.  The exposed API is just wrappers around the functions available in `HGRepo`.
 
+```javascript
+var hg = require("hg"),
+	HGRepo = hg.HGRepo;
+
+var repo = new HGRepo("/some/path/to/repo");
+
+repo.summary(function(err, output) {
+	if (err) {
+		throw err;
+	}
+
+	output.forEach(function(line) {
+		console.log(line.body);
+	});
+});
+
+repo.add(["."], function(err, output) {
+	if (err) {
+		throw err;
+	}
+
+	output.forEach(function(line) {
+		console.log(line.body);
+	});
+});
+
+// And so on...
+
+```
+
 #### HGCommandServer
 
 The base class responsible for instantiating and communicating with a Mercurial command server.  Must be instantiated in an existing Mercurial repository (check out `HGRepo.MakeTempRepo` to quickly get a temporary repo up)
+
+```javascript
+var hg = require("hg"),
+	HGCommandServer = hg.HGCommandServer;
+
+var serv = new HGCommandServer();
+
+serv.start("/some/path/to/repo", function(err) {
+	if (err) {
+		throw err;
+	}
+
+	console.log("Command Server Started", serv.capabilities, serv.encoding);
+
+	serv.on("output", function(err, lines) {
+		lines.forEach(function(line) {
+			console.log(line.body);
+		});
+	});
+
+	serv.runcommand("summary");
+});
+```
 
 LICENSE
 =======
