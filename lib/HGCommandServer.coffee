@@ -4,7 +4,6 @@
 
 _ = require "lodash"
 
-Logger = require "./common/logger"
 OutputLine = require "./common/OutputLine"
 
 defaults = 
