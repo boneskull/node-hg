@@ -25,13 +25,11 @@
     "grunt-simple-mocha": "~0.3.2",
     "mocha": "~1.8.1"
   },
-  "peerDependencies": {
+  "dependencies": {
     "grunt": "0.4.x",
     "coffee-script": ">= 1.4.0",
     "lodash": ">= 1.0.0",
-    "winston": ">= 0.5.0"
-  },
-  "dependencies": {
+    "winston": ">= 0.5.0",
     "uuid": "~1.4.0"
   }
 }
