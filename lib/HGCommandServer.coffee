@@ -88,8 +88,16 @@ class HGCommandServer extends EventEmitter
 	Create the child process (exposed for unit testing mostly)
 	###
 	_makeHgProcess: (path) ->
-		spawn 'hg', @config.hgOpts, 
+		# Try to coerce the UTF-8 encoding setting
+		# TODO: Make this configurable?
+		processEnv = _.extend({ "HGENCODING": "UTF-8" }, process.env)
+
+		spawnOpts = 
+			env: processEnv
 			cwd: path or process.cwd()
+
+		spawn 'hg', @config.hgOpts, spawnOpts
+		 	
 
 	###
 	Parse the capabilities and encoding when the cmd server starts up
