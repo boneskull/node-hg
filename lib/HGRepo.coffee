@@ -73,9 +73,16 @@ class HGRepo
 	Clone a repository.  Due to limitations of the cmdserver, this must be run from an 
 	existing location.
 	###
-	clone: (from, to, done) ->
+	clone: (from, to, opts, done) ->
+		# Curry the arguments if no opts passed
+		if _.isFunction opts
+			done = opts 
+			opts = []
+
+		opts = @_parseOptions opts
+
 		serverCmd = (server) ->
-			server.runcommand "clone", from, to
+			server.runcommand.apply server, ["clone", from, to].concat(opts)
 
 		@_runCommandGetOutput @path, serverCmd, done
 
