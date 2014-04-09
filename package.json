@@ -1,6 +1,6 @@
 {
   "name": "hg",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A Mercurial client for Node",
   "main": "index.js",
   "repository": {
