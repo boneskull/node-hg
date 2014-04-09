@@ -89,9 +89,16 @@ class HGRepo
 	###
 	Get a summary of the current repository path.
 	###
-	summary: (done) ->
+	summary: (opts, done) ->
+		# Curry the arguments if no opts passed
+		if _.isFunction opts
+			done = opts
+			opts = []
+
+		opts = @_parseOptions opts
+
 		serverCmd = (server) ->
-			server.runcommand "summary"
+			server.runcommand.apply server, ["summary"].concat(opts)
 
 		@_runCommandGetOutput @path, serverCmd, done
 
